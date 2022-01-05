@@ -10,13 +10,12 @@ import (
 	"github.com/tarm/serial"
 	"go.bug.st/serial.v1/enumerator"
 )
-var next = time.Now().Add(30 * time.Second)
 var stomp = make(chan bool)
 var datastream = make(chan string)
 
 func timestamp(eventchan chan bool) {
 	for true {
-		time.Sleep(5 * time.Second)
+		time.Sleep(30 * time.Second)
 		eventchan <- true
 	}
 }
