@@ -16,6 +16,7 @@ func main() {
 	serialPort := ""
 	if 2 == len(os.Args) {
 		serialPort = os.Args[1]
+		
 	} else {
 		ports, err := enumerator.GetDetailedPortsList()
 		if err != nil {
@@ -29,10 +30,11 @@ func main() {
 			serialPort = ports[0].Name
 		}
 	}
+	fmt.Println("opening port:", serialPort)
 	conf := &serial.Config{Name: serialPort, Baud: 115200}
 	sp, err := serial.OpenPort(conf)
 	if err != nil {
-		fmt.Sprintf("Unable to open serial port %s", serialPort)
+		fmt.Println("Unable to open serial port", serialPort)
 		os.Exit(-1)
 	}
 	defer sp.Close()
