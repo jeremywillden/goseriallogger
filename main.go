@@ -48,8 +48,10 @@ func serialreceive(receivechan chan string) {
 	}
 	defer sp.Close()
 	scanner := bufio.NewScanner(sp)
-	for scanner.Scan() {
-		receivechan <- scanner.Text()
+	for true {
+		if scanner.Scan() {
+			receivechan <- scanner.Text()
+		}
 	}
 }
 
