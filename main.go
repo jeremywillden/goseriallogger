@@ -10,9 +10,18 @@ import (
 	"github.com/tarm/serial"
 	"go.bug.st/serial.v1/enumerator"
 )
+var next = time.Now().Add(30 * time.Second)
+var stomp = make(chan bool)
+var datastream = make(chan string)
 
-func main() {
-	next := time.Now().Add(5 * time.Second)
+func timestamp(eventchan chan bool) {
+	for true {
+		time.Sleep(5 * time.Second)
+		eventchan <- true
+	}
+}
+
+func serialreceive(receivechan chan string) {
 	serialPort := ""
 	if 2 == len(os.Args) {
 		serialPort = os.Args[1]
@@ -39,15 +48,21 @@ func main() {
 	}
 	defer sp.Close()
 	scanner := bufio.NewScanner(sp)
+	for scanner.Scan() {
+		receivechan <- scanner.Text()
+	}
+}
+
+func main() {
+	go timestamp(stomp)
+	go serialreceive(datastream)
 	for true {
-		if scanner.Scan() {
-			fmt.Println(scanner.Text())
-		} else {
-			currenttime := time.Now()
-			if currenttime.After(next) {
-				next = time.Now().Add(5 * time.Second)
-				fmt.Println(currenttime.Format("2006-01-02 15:04:05"))
-			}
-		}		
+		select {
+			case rxmessage := <- datastream:
+				fmt.Println(rxmessage)
+			case <- stomp:
+				currenttime := time.Now()
+				fmt.Println(currenttime.Format("========== TIMESTAMP ========== 2006-01-02 15:04:05 =========="))
+		}
 	}
 }
